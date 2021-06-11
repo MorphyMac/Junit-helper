@@ -59,7 +59,13 @@ public class ControllerTest {
                                                                          .header("Authentication", "---token---");
         MockHttpServletRequestBuilder postJson = MockMvcRequestBuilders.post("/users")
                                                                        .contentType(MediaType.APPLICATION_JSON)
-                                                                       .content("{ \"userName\": \"Joe\"}");
+                                                                       .content("{ \"userName\": \"Joe\"}")
+            
+                                                                        // security
+																	   .with(csrf())
+																	   .with(SecurityMockMvcRequestPostProcessors.user("duke"))
+																	   .with(user("duke").roles("ADMIN", "SUPER_USER"))
+																	   .with(SecurityMockMvcRequestPostProcessors.user("duke").roles("ADMIN", "SUPER_USER"));
         MockHttpServletRequestBuilder postXml = MockMvcRequestBuilders.post("/users")
                                                                       .contentType(MediaType.APPLICATION_XML)
                                                                       .content("<user><userName>Joe</userName></user>");
