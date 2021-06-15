@@ -1,0 +1,174 @@
+###
+###
+###
+###			SONAR-SCANNER 			(same as jenkins tracks)
+###
+###
+
+# run MVN test phase where jacoco will generate reports, these will be read by sonar scanner for coverage
+mvn clean install
+# in module dir where we have sonar-project.properties 
+sonar-scanner.bat
+
+
+#--------------------1	Install sonar-scanner from 
+#	https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/
+#
+#--------------------2	set env var and update PATH with   
+#	C:\Users\anwar_alam\work\sonarqube\sonar-scanner-cli\bin
+#
+#--------------------3	update properties conf folder
+#
+#----- Default SonarQube server
+sonar.host.url=http://localhost:9000
+sonar.login=admin
+sonar.password=password
+
+#----- Default source code encoding
+sonar.sourceEncoding=UTF-8
+
+these we will pass from terminal or project
+#sonar.projectKey=sonar-scanner
+#sonar.sources=D:/CodeBase/sharebook-Client/src
+
+#--------------------4	scan project
+
+goto your project directory
+eg.   /c/Users/anwar_alam/work/codebase/epam/essportal/ess-els
+
+and run 
+$ sonar-scanner.bat
+
+$ sonar-scanner.bat -Dsonar.verbose=true -Dsonar.java.source=8
+
+###
+###
+###
+###			SONAR-QUBE
+###
+###
+
+# create volume for sonarqube server
+
+docker volume create sonarqube-conf 
+docker volume create sonarqube-data
+docker volume create sonarqube-logs
+docker volume create sonarqube-extensions
+
+# you can inspect volumes    -- you can check volume location
+
+docker volume inspect sonarqube-conf 
+docker volume inspect sonarqube-data
+docker volume inspect sonarqube-logs
+docker volume inspect sonarqube-extensions
+
+# (Optional) creating soft link for volume directories
+
+mkdir /sonarqube
+ln -s /var/lib/docker/volumes/sonarqube-conf/_data /sonarqube/conf
+ln -s /var/lib/docker/volumes/sonarqube-data/_data /sonarqube/data
+ln -s /var/lib/docker/volumes/sonarqube-logs/_data /sonarqube/logs
+ln -s /var/lib/docker/volumes/sonarqube-extensions/_data /sonarqube/extensions
+
+ln -s /var/lib/docker/volumes/sonarqube-conf/_data /sonarqube/conf
+
+
+# run sonarqube as docker process
+
+docker run -d --name sonarqube -p 9000:9000 -p 9092:9092 \
+-v ./sonarqube-conf:/opt/sonarqube/conf \
+-v ./sonarqube-data:/opt/sonarqube/data \
+-v ./sonarqube-logs:/opt/sonarqube/logs \
+-v ./sonarqube-extensions:/opt/sonarqube/extensions \
+sonarqube
+
+$ mvn sonar:sonar -Dsonar.host.url=http://localhost:9000 -Dsonar.login=admin -Dsonar.password=password
+
+
+
+docker ps -a
+docker ps -a -f name=sonarqube
+docker container stop sonarqube
+docker container start sonarqube
+docker container restart sonarqube
+docker logs sonarqube
+
+
+
+
+
+sonar.projectKey=EPM-ESS-ELS-SONAR
+sonar.projectName=EPM-ESS-ELS-SONAR
+# Source information
+sonar.sources=src/main
+sonar.sourceEncoding=UTF-8
+sonar.language=java
+# Tests
+sonar.tests=src/test
+sonar.junit.reportPaths=target/surefire-reports
+sonar.surefire.reportsPath=target/surefire-reports
+sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+sonar.java.binaries=target/classes
+#sonar.java.libraries=target/lib/*.jar
+sonar.java.coveragePlugin=jacoco
+sonar.verbose=true
+sonar.java.source=8
+
+
+
+
+
+## lombok.config along with pom.xml
+config.stopBubbling=true
+lombok.addLombokGeneratedAnnotation=true
+
+## pom.xml - profile based or if for all then use just build part
+#####
+#####	mvn clean install -Pqa
+#####	mvn dependency:copy-dependencies -Pqa
+
+<profiles>
+	<profile>
+		<id>dev</id>
+				
+		<build>
+			<plugins>
+				<plugin>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<executions>
+						<execution>
+							<phase>prepare-package</phase>
+							<goals>
+								<goal>copy-dependencies</goal>
+							</goals>
+							<configuration>
+								
+								<includeArtifactIds>lombok,log4j</includeArtifactIds>     <!-- remove this if you want to copy all deps, copying specific artifact by artifactId-->
+								
+								<outputDirectory>${project.build.directory}/lib</outputDirectory>
+								<overWriteReleases>false</overWriteReleases>
+								<overWriteSnapshots>false</overWriteSnapshots>
+								<overWriteIfNewer>true</overWriteIfNewer>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</build>		
+		
+	</profile>
+</profiles>
+
+##
+##	$ sonar-scanner.bat -Dsonar.verbose=true -Dsonar.java.source=8 -Dsonar.java.libraries=target/lib/*.jar
+
+
+
+Security Review Rating Ranges
+Security Review Rating value is based on the value of the Security Hotspots Reviewed measure following this table:
+## Rating	Range
+A	>= 80%
+B	>= 70% and < 80%
+C	>= 50% and < 70%
+D	>= 30% and < 50%
+E	< 30%
