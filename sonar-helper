@@ -1,3 +1,23 @@
+## sonar-project.properties
+
+sonar.projectKey=MyProject
+sonar.projectName=MyProject
+# Source information
+sonar.sources=src/main
+sonar.sourceEncoding=UTF-8
+sonar.language=java
+# Tests
+sonar.tests=src/test
+sonar.junit.reportPaths=target/surefire-reports
+sonar.surefire.reportsPath=target/surefire-reports
+sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+sonar.java.binaries=target/classes
+sonar.java.coveragePlugin=jacoco
+# for lombok
+sonar.java.libraries=target/libs/*.jar
+sonar.java.source=8
+
+
 ###
 ###
 ###
